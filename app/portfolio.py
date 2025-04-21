@@ -1,26 +1,29 @@
 import pandas as pd
 import chromadb
-from chromadb.config import Settings
 import uuid
 import os
+from chromadb.config import Settings
 
 class Portfolio:
-    def __init__(self, file_path="resources/portfolio.csv"):
+    def __init__(self, file_path=None):
+        base_path = os.path.dirname(__file__)
+        if file_path is None:
+            file_path = os.path.join(base_path, "resources", "portfolio.csv")
         self.file_path = file_path
-        self.data = pd.read_csv(file_path)
+        self.data = pd.read_csv(self.file_path)
 
-        # Make sure vectorstore folder exists
-        persist_dir = "vectorstore"
+        persist_dir = os.path.join(base_path, "..", "vectorstore")
         os.makedirs(persist_dir, exist_ok=True)
 
         self.chroma_client = chromadb.Client(Settings(
             chroma_db_impl="duckdb+parquet",
             persist_directory=persist_dir
         ))
+
         self.collection = self.chroma_client.get_or_create_collection(name="portfolio")
 
     def load_portfolio(self):
-        if not self.collection.count():
+        if self.collection.count() == 0:
             for _, row in self.data.iterrows():
                 self.collection.add(
                     documents=[row["Techstack"]],
