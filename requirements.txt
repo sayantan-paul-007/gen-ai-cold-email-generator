@@ -7,3 +7,4 @@ python-dotenv
 pandas
 chromadb>=0.4.13
 duckdb
+pysqlite3-binary
