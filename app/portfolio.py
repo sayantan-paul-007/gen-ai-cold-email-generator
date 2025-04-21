@@ -15,20 +15,13 @@ class Portfolio:
         persist_dir = os.path.join(base_path, "..", "vectorstore")
         os.makedirs(persist_dir, exist_ok=True)
 
-        if "STREAMLIT_SHARING" in os.environ:
-            self.chroma_client = chromadb.Client(Settings(
-                chroma_db_impl="duckdb+parquet",
-                anonymized_telemetry=False
-            ))
-        else:
-            # Your original implementation for local development
-            self.chroma_client = chromadb.Client(Settings(
-                chroma_db_impl="duckdb+parquet",
-                persist_directory=persist_dir
-            ))
-
+        self.chroma_client = chromadb.Client(Settings(
+            chroma_db_impl="duckdb+parquet",
+            persist_directory=persist_dir
+        ))
+        
         self.collection = self.chroma_client.get_or_create_collection(name="portfolio")
-
+        self.load_portfolio()
     def load_portfolio(self):
         if self.collection.count() == 0:
             for _, row in self.data.iterrows():
